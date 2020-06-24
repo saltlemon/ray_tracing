@@ -10,20 +10,45 @@
 using namespace std;
 vec3 what_color(const ray& r, hitable *world, int depth){
 	hit_record rec;
+	/* if (depth <= 0)
+		return vec3(0, 0, 0);
 	if (world->hit(r, 0.001, FLT_MAX, rec)){
 		ray scattered;
 		vec3 attenuation;
-		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)){
-			return attenuation*what_color(scattered, world, depth+1);
+		vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.point);
+		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)){
+			return emitted + attenuation * what_color(scattered, world, depth - 1);
 		}
 		else{
-			return vec3(0, 0, 0);
+			return emitted;
 		}
 	}
 	else{
-		vec3 unit_dir = unit_vector(r.direction());
-		float temp = 0.5*(unit_dir.y() + 1.0);
-		return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
+		//vec3 unit_dir = unit_vector(r.direction());
+		//float temp = 0.5*(unit_dir.y() + 1.0);
+		//return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
+		return vec3(0, 0, 0);
+	}
+	*/
+	if (world->hit(r, 0.001, FLT_MAX, rec)){
+		ray scattered;
+		vec3 attenuation;
+		vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.point);
+
+		if (depth >= 50) return vec3(0.1, 0.1, 0.1);
+
+		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)){
+			return truncation(emitted + attenuation * what_color(scattered, world, depth + 1));
+		}
+		else{
+			return emitted;
+		}
+	}
+	else{
+		//vec3 unit_dir = unit_vector(r.direction());
+		//float temp = 0.5*(unit_dir.y() + 1.0);
+		//return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
+		return vec3(0.1, 0.1, 0.1);
 	}
 }
 
@@ -55,8 +80,9 @@ hitable *random_scene(){
 			}
 		}
 	}
+	
 	list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
-	list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(std::make_shared<img_texture>("earth.jpg")));
+	list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new diffuse_light(std::make_shared<solid_color>(4, 4, 4)));
 	list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
 
 	return new hitable_list(list, i);
@@ -93,11 +119,11 @@ unsigned char * PathTracer::render(double & timeConsuming)
 
 	// record start time.
 	double startFrame = clock();
-	vec3 lookfrom(4,0.6,3);
+	vec3 lookfrom(5,1,3);
 	vec3 lookat(0,0.6,0);
-	float dist_to_focus = 6;
+	float dist_to_focus = 5;
 	float aperture = 0.0;
-	camera cam(lookfrom, lookat, vec3(0, 1, 0), 90, m_width / m_height,aperture,dist_to_focus);
+	camera cam(lookfrom, lookat, vec3(0, 1, 0), 45, m_width / m_height,aperture,dist_to_focus);
 	
 	hitable *world = random_scene();
 	// render the image pixel by pixel.

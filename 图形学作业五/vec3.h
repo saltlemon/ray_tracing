@@ -142,4 +142,13 @@ inline vec3 unit_vector(vec3 v) {
 inline vec3 reflect(const vec3 &v, const vec3 &n) {
 	return v - 2 * dot(v, n) * n;
 }
+inline vec3 truncation(const vec3 &rgb) {
+	if (rgb.length() <= 1)
+		return rgb;
+	vec3 temp = rgb;
+	if (temp.r() > 1)temp[0] = 1;
+	if (temp.g() > 1)temp[1] = 1;
+	if (temp.b() > 1)temp[2] = 1;
+	return temp;
+}
 #endif

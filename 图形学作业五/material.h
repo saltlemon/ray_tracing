@@ -9,12 +9,27 @@ class material {
 public:
 	//击中射线，撞击记录，衰减率（暂时可理解为颜色），下一步的采样方向（折射或反射或其他）
 	virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const = 0;
-	
+	virtual vec3 emitted(const float &u,const float &v, const vec3 &p) const
+	{
+		return vec3(0.0f, 0.0f, 0.0f);
+	}
 };
 
+class diffuse_light :public material{
+public:
+	diffuse_light(std::shared_ptr<texture> a) : albedo(a) {};
+	virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const {
+		return false;
+	}
+	virtual vec3 emitted(const float &u,const float &v, const vec3 &p) const
+	{
+		return  albedo->value(u, v, p);
+	}
+	std::shared_ptr<texture> albedo;
+};
 class lambertian : public material{
 public:
-	lambertian(std::shared_ptr<texture> a) : albedo(a) {}
+	lambertian(std::shared_ptr<texture> a) : albedo(a) {};
 	virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const{
 		vec3 target = rec.point + rec.normal + random_in_unit_sphere();//新的采样目标
 		scattered = ray(rec.point, target - rec.point);// 新的采样射线，兰伯特会随机打线
