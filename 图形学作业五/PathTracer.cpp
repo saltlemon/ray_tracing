@@ -1,6 +1,7 @@
 #include "PathTracer.h"
 #include "ray.h"
 #include"sphere.h"
+#include"triangle.h"
 #include"hitable_list.h"
 #include"camera.h"
 #include"random_num.h"
@@ -45,10 +46,10 @@ vec3 what_color(const ray& r, hitable *world, int depth){
 		}
 	}
 	else{
-		//vec3 unit_dir = unit_vector(r.direction());
-		//float temp = 0.5*(unit_dir.y() + 1.0);
-		//return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
-		return vec3(0.1, 0.1, 0.1);
+		vec3 unit_dir = unit_vector(r.direction());
+		float temp = 0.5*(unit_dir.y() + 1.0);
+		return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
+		//return vec3(0.1, 0.1, 0.1);
 	}
 }
 
@@ -125,7 +126,15 @@ unsigned char * PathTracer::render(double & timeConsuming)
 	float aperture = 0.0;
 	camera cam(lookfrom, lookat, vec3(0, 1, 0), 45, m_width / m_height,aperture,dist_to_focus);
 	
-	hitable *world = random_scene();
+	//hitable *world = random_scene();
+	hitable *list[2];
+	list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(
+		make_shared<checker_texture>(
+		make_shared<solid_color>(0.2, 0.3, 0.1),
+		make_shared<solid_color>(0.9, 0.9, 0.9)
+		)));
+	list[1] = new triangle(vec3(1, 1, 1), vec3(0, 1, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), new lambertian(std::make_shared<img_texture>("earth.jpg")));
+	hitable *world = new hitable_list(list, 2);
 	// render the image pixel by pixel.
 	for (int row = m_height - 1; row >= 0; --row)
 	{
