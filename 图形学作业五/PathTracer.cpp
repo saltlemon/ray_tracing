@@ -6,6 +6,7 @@
 #include"camera.h"
 #include"random_num.h"
 #include"material.h"
+#include"model.h"
 #include <time.h>
 #include <iostream>
 using namespace std;
@@ -133,7 +134,8 @@ unsigned char * PathTracer::render(double & timeConsuming)
 		make_shared<solid_color>(0.2, 0.3, 0.1),
 		make_shared<solid_color>(0.9, 0.9, 0.9)
 		)));
-	list[1] = new triangle(vec3(1, 1, 1), vec3(0, 1, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), new lambertian(std::make_shared<img_texture>("earth.jpg")));
+	//list[1] = new triangle(vec3(1, 1, 1), vec3(0, 1, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), new lambertian(std::make_shared<img_texture>("diablo3_pose_diffuse.tga")));
+	list[1] = new model(vec3(1, 0.6, 1), "box.obj", new lambertian(std::make_shared<img_texture>("earth.jpg")));
 	hitable *world = new hitable_list(list, 2);
 	// render the image pixel by pixel.
 	for (int row = m_height - 1; row >= 0; --row)
