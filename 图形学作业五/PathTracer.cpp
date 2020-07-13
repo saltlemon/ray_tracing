@@ -40,6 +40,8 @@ vec3 what_color(const ray& r, hitable *world, int depth){
 		if (depth >= 50) return vec3(0.1, 0.1, 0.1);
 
 		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)){
+			//truncation是截断函数，用于将颜色分量大一的进行截断，如（1.1，0.2，1.6）->(1 , 0.2, 1)
+
 			return truncation(emitted + attenuation * what_color(scattered, world, depth + 1));
 		}
 		else{
@@ -134,8 +136,8 @@ unsigned char * PathTracer::render(double & timeConsuming)
 		make_shared<solid_color>(0.2, 0.3, 0.1),
 		make_shared<solid_color>(0.9, 0.9, 0.9)
 		)));
-	//list[1] = new triangle(vec3(1, 1, 1), vec3(0, 1, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), new lambertian(std::make_shared<img_texture>("diablo3_pose_diffuse.tga")));
-	list[1] = new model(vec3(1, 0.6, 1), "box.obj", new lambertian(std::make_shared<img_texture>("earth.jpg")));
+	list[1] = new triangle(vec3(1, 1, 1), vec3(0, 1, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), vec3(0, 0, 1), new lambertian(std::make_shared<img_texture>("diablo3_pose_diffuse.tga")));
+	//list[1] = new model(vec3(1, 0.6, 1), "box.obj", new lambertian(std::make_shared<img_texture>("earth.jpg")));
 	hitable *world = new hitable_list(list, 2);
 	// render the image pixel by pixel.
 	for (int row = m_height - 1; row >= 0; --row)

@@ -4,7 +4,7 @@
 #include"hitable.h"
 #include"material.h"
 
-void get_sphere_uv(const vec3& p, float& u, float& v) {
+void get_sphere_uv(const vec3& p, float& u, float& v) {//球形uv获取
 	auto phi = atan2(p.z(), p.x());
 	auto theta = asin(p.y());
 	u = 1 - (phi + M_PI) / (2 * M_PI);
@@ -16,8 +16,8 @@ public:
 	sphere(){}
 	sphere(vec3 cen, float r, material* mat) :center(cen), radius(r),mat_ptr(mat){};
 	virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
-	vec3 center;
-	float radius;
+	vec3 center;//球心
+	float radius;//半径
 	material *mat_ptr;
 };
 

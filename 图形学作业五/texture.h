@@ -13,7 +13,7 @@ public:
 	virtual vec3 value(double u, double v, const vec3& point) const = 0;
 };
 
-class solid_color :public texture{
+class solid_color :public texture{//单色纹理
 public:
 	solid_color(){}
 	solid_color(vec3 c) :color_value(c){}
@@ -28,7 +28,7 @@ public:
 	vec3 color_value;
 };
 
-class checker_texture : public texture {
+class checker_texture : public texture {//棋盘纹理
 public:
 	checker_texture() {}
 	checker_texture(shared_ptr<texture> t0, shared_ptr<texture> t1) : even(t0), odd(t1) {}
@@ -46,7 +46,7 @@ public:
 	shared_ptr<texture> even;
 };
 
-class img_texture :public texture{
+class img_texture :public texture{//图片纹理
 private:
 	unsigned char *m_data;
 	int m_width, m_height, m_channel;

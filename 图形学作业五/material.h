@@ -15,7 +15,7 @@ public:
 	}
 };
 
-class diffuse_light :public material{
+class diffuse_light :public material{//光源材质，将碰撞到该材质的光线设为光源颜色，光源颜色的分量会大于1，如（4，4，4）
 public:
 	diffuse_light(std::shared_ptr<texture> a) : albedo(a) {};
 	virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const {
@@ -75,7 +75,7 @@ float schlick(float cosine, float ref_idx) {
 	r0 = r0 * r0;
 	return r0 + (1 - r0)*pow((1 - cosine), 5);
 }
-class dielectric : public material{
+class dielectric : public material{//玻璃材质，可认为即反射光线，又折射光线
 public:
 	dielectric(float ri) :ref_idx(ri){}
 	virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const{
@@ -103,7 +103,7 @@ public:
 			scattered = ray(rec.point, reflected);
 			reflect_prob = 1.0;
 		}
-		if (rand_num() < reflect_prob){
+		if (rand_num() < reflect_prob){//通过大数多次采样来保证玻璃的折射反射占比
 			scattered = ray(rec.point, reflected);
 		}
 		else{

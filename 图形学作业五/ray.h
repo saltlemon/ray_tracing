@@ -12,9 +12,9 @@ public:
 	{
 		A = a; B = b;
 	}
-	vec3 origin() const{ return A; }
-	vec3 direction() const{ return B; }
-	vec3 point_at_parameter(float t) const{ return A + t*B; }
+	vec3 origin() const{ return A; }//光线原点
+	vec3 direction() const{ return B; }//光线方向
+	vec3 point_at_parameter(float t) const{ return A + t*B; }//光线碰撞点
 
 };
 

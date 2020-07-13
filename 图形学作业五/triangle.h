@@ -4,7 +4,7 @@
 #include"hitable.h"
 #include"material.h"
 
-class triangle :public hitable{
+class triangle :public hitable{//三角形
 public:
 	triangle(){}
 	triangle(vec3 p0, vec3 p1, vec3 p2, vec3 n0,vec3 n1, vec3 n2, material* mat,
@@ -16,12 +16,15 @@ public:
 		d =  -dot(normal, point0); 
 	}
 	virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
+	//三个点的坐标
 	vec3 point0;
 	vec3 point1;
 	vec3 point2;
+	//三个点的法向量
 	vec3 normal0;
 	vec3 normal1;
 	vec3 normal2;
+	//三个点的uv值
 	float u0, u1, u2, v0, v1, v2;
 	vec3 normal;
 	float d;
@@ -48,7 +51,7 @@ bool triangle::hit(const ray& r, float t_min, float t_max, hit_record& rec) cons
 	float dot_R_Q1 = dot(R, Q1);
 	float dot_R_Q2 = dot(R, Q2);
 	float determinant = 1.0f / (dot_Q1_Q1*dot_Q2_Q2 - dot_Q1_Q2*dot_Q1_Q2);
-
+	//获取当前点的信息，由三个顶点和omega，1omega2得到
 	float omega1 = determinant*(dot_Q2_Q2*dot_R_Q1 - dot_Q1_Q2*dot_R_Q2);
 	float omega2 = determinant*(-dot_Q1_Q2*dot_R_Q1 + dot_Q1_Q1*dot_R_Q2);
 	if (omega1 + omega2 > 1.0f || omega1 < 0.0f || omega2 < 0.0f)
