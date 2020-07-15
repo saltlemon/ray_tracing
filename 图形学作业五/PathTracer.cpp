@@ -40,7 +40,7 @@ vec3 what_color(const ray& r, bvh_node *p, int depth){
 		vec3 attenuation;
 		vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.point);
 
-		if (depth >= 50) return vec3(0.1, 0.1, 0.1);
+		if (depth >= 50) return vec3(0, 0, 0);
 
 		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)){
 			//truncation是截断函数，用于将颜色分量大一的进行截断，如（1.1，0.2，1.6）->(1 , 0.2, 1)
@@ -55,7 +55,7 @@ vec3 what_color(const ray& r, bvh_node *p, int depth){
 		vec3 unit_dir = unit_vector(r.direction());
 		float temp = 0.5*(unit_dir.y() + 1.0);
 		return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
-		//return vec3(0.1, 0.1, 0.1);
+		//return vec3(0, 0, 0);
 	}
 }
 
