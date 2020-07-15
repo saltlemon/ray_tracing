@@ -3,5 +3,42 @@
 
 #include"vec3.h"
 #include"ray.h"
+#include"hitable.h"
+#include<memory>
+class aabb{
+public:
+	aabb(){}
+	aabb(const vec3& min_xyz, const vec3& max_xyz) :_min(min_xyz), _max(max_xyz){}
+	vec3 min() const{ return _min; };
+	vec3 max() const{ return _max; };
+
+	bool hit(const ray& r, double tmin,double tmax) const{
+		for (int i = 0; i < 3;i++){
+			auto invD = 1.0f / r.direction()[i];
+			auto t0 = (min()[i] - r.origin()[i])*invD;
+			auto t1 = (max()[i] - r.origin()[i])*invD;
+			if (invD < 0.0f)
+				std::swap(t0, t1);
+			tmin = t0 > tmin ? t0 : tmin;
+			tmax = t1 < tmax ? t1 : tmax;
+			if (tmax <= tmin)
+				return false;
+		}
+		return true;
+	}
+	vec3 _min;
+	vec3 _max;
+};
+inline aabb surrounding_box(aabb box0, aabb box1) {
+	vec3 small(fmin(box0.min().x(), box1.min().x()),
+		fmin(box0.min().y(), box1.min().y()),
+		fmin(box0.min().z(), box1.min().z()));
+
+	vec3 big(fmax(box0.max().x(), box1.max().x()),
+		fmax(box0.max().y(), box1.max().y()),
+		fmax(box0.max().z(), box1.max().z()));
+
+	return aabb(small, big);
+}
 
 #endif

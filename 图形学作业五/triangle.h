@@ -4,6 +4,26 @@
 #include"hitable.h"
 #include"material.h"
 
+float min3(float a, float b, float c){
+	float temp;
+	if (a < b)
+		temp = a;
+	else
+		temp = b;
+	if (c < temp)
+		temp = c;
+	return temp;
+}
+float max3(float a, float b, float c){
+	float temp;
+	if (a > b)
+		temp = a;
+	else
+		temp = b;
+	if (c > temp)
+		temp = c;
+	return temp;
+}
 class triangle :public hitable{//三角形
 public:
 	triangle(){}
@@ -16,6 +36,7 @@ public:
 		d =  -dot(normal, point0); 
 	}
 	virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const;
+	virtual bool bounding_box(double t0, double t1, aabb& output_box) const;
 	//三个点的坐标
 	vec3 point0;
 	vec3 point1;
@@ -61,6 +82,17 @@ bool triangle::hit(const ray& r, float t_min, float t_max, hit_record& rec) cons
 	rec.v = v0* (1.0f - omega1 - omega2) + v1 * omega1 + v2 * omega2;
 	if (dot(rec.normal, r.direction()) > 0.0f)
 		rec.normal = -rec.normal;
+	return true;
+}
+bool triangle::bounding_box(double t0, double t1, aabb& output_box) const
+{
+	output_box = aabb(
+		vec3(min3(point0.x(), point1.x(), point2.x()),
+		min3(point0.y(), point1.y(), point2.y()),
+		min3(point0.z(), point1.z(), point2.z())),
+		vec3(max3(point0.x(), point1.x(), point2.x()),
+		max3(point0.y(), point1.y(), point2.y()),
+		max3(point0.z(), point1.z(), point2.z())));
 	return true;
 }
 #endif

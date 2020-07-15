@@ -6,7 +6,7 @@
 float rand_num() {
 	static std::uniform_real_distribution<float> u_rand(0, 1);
 	static std::default_random_engine rand_engine;
-
+	rand_engine.seed(std::random_device()());
 	return u_rand(rand_engine);
 }
 

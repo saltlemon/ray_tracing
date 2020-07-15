@@ -6,11 +6,12 @@
 #include"camera.h"
 #include"random_num.h"
 #include"material.h"
+#include"bvh_node.h"
 #include"model.h"
 #include <time.h>
 #include <iostream>
 using namespace std;
-vec3 what_color(const ray& r, hitable *world, int depth){
+vec3 what_color(const ray& r, bvh_node *p, int depth){
 	hit_record rec;
 	/* if (depth <= 0)
 		return vec3(0, 0, 0);
@@ -32,7 +33,9 @@ vec3 what_color(const ray& r, hitable *world, int depth){
 		return vec3(0, 0, 0);
 	}
 	*/
-	if (world->hit(r, 0.001, FLT_MAX, rec)){
+	
+	
+	if (p->hit(r, 0.001, FLT_MAX, rec)){
 		ray scattered;
 		vec3 attenuation;
 		vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.point);
@@ -42,7 +45,7 @@ vec3 what_color(const ray& r, hitable *world, int depth){
 		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)){
 			//truncation是截断函数，用于将颜色分量大一的进行截断，如（1.1，0.2，1.6）->(1 , 0.2, 1)
 
-			return truncation(emitted + attenuation * what_color(scattered, world, depth + 1));
+			return truncation(emitted + attenuation * what_color(scattered, p, depth + 1));
 		}
 		else{
 			return emitted;
@@ -56,7 +59,7 @@ vec3 what_color(const ray& r, hitable *world, int depth){
 	}
 }
 
-hitable *random_scene(){
+hitable_list random_scene(){
 	int n = 500;
 	hitable **list = new hitable*[n + 1];
 	list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(
@@ -84,12 +87,12 @@ hitable *random_scene(){
 			}
 		}
 	}
-	
+
 	list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
 	list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new diffuse_light(std::make_shared<solid_color>(4, 4, 4)));
 	list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
 
-	return new hitable_list(list, i);
+	return  hitable_list(list, i);
 }
 
 PathTracer::PathTracer()
@@ -129,7 +132,9 @@ unsigned char * PathTracer::render(double & timeConsuming)
 	float aperture = 0.0;
 	camera cam(lookfrom, lookat, vec3(0, 1, 0), 45, m_width / m_height,aperture,dist_to_focus);
 	
-	//hitable *world = random_scene();
+	hitable_list world = random_scene();
+	bvh_node *p = new bvh_node(world, 0.001, FLT_MAX);
+	/*
 	hitable *list[2];
 	list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(
 		make_shared<checker_texture>(
@@ -140,6 +145,7 @@ unsigned char * PathTracer::render(double & timeConsuming)
 	//list[1] = new model(vec3(1, 0.6, 1), "box.obj", new lambertian(std::make_shared<img_texture>("earth.jpg")));
 	hitable *world = new hitable_list(list, 2);
 	// render the image pixel by pixel.
+	*/
 	for (int row = m_height - 1; row >= 0; --row)
 	{
 		for (int col = 0; col < m_width; ++col)
@@ -150,7 +156,7 @@ unsigned char * PathTracer::render(double & timeConsuming)
 				float u = (static_cast<float>(col)+rand_num()) / static_cast<float>(m_width);
 				float v = (static_cast<float>(row)+rand_num()) / static_cast<float>(m_height);
 				ray r = cam.get_ray(u, v);
-				color += what_color(r, world ,0);
+				color += what_color(r, p ,0);
 			}
 			color /= 100;
 			color = vec3(sqrt(color[0]), sqrt(color[1]), sqrt(color[2]));
