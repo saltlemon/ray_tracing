@@ -8,9 +8,14 @@
 #include"material.h"
 #include"bvh_node.h"
 #include"model.h"
+
 #include <time.h>
 #include <iostream>
+
+
+
 using namespace std;
+
 vec3 what_color(const ray& r, bvh_node *p, int depth){
 	hit_record rec;
 	/* if (depth <= 0)
@@ -48,7 +53,7 @@ vec3 what_color(const ray& r, bvh_node *p, int depth){
 			return truncation(emitted + attenuation * what_color(scattered, p, depth + 1));
 		}
 		else{
-			return emitted;
+			return truncation(emitted);
 		}
 	}
 	else{
@@ -116,6 +121,8 @@ void PathTracer::initialize(int width, int height)
 	m_image = new unsigned char[width * height * m_channel];
 }
 
+
+
 unsigned char * PathTracer::render(double & timeConsuming)
 {
 	if (m_image == nullptr)
@@ -146,6 +153,7 @@ unsigned char * PathTracer::render(double & timeConsuming)
 	hitable *world = new hitable_list(list, 2);
 	// render the image pixel by pixel.
 	*/
+	#pragma omp parallel for
 	for (int row = m_height - 1; row >= 0; --row)
 	{
 		for (int col = 0; col < m_width; ++col)
