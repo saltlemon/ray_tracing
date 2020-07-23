@@ -2,112 +2,27 @@
 #define MODELH
 
 #include"triangle.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include <fstream>
+#include <sstream>
+#include<iostream>
+#include<string>
 #include<vector>
+#include<vector>
+using namespace std;
 struct uv{
 	float u, v;
 	uv(float u, float v):u(u),v(v){}
 };
 class model :public hitable{
 public:
-	bool loadModel(const std::string& filePath){
-		Assimp::Importer importer;
-		// 加载模型 得到aiScene
-		const aiScene* sceneObjPtr = importer.ReadFile(filePath,
-			aiProcess_Triangulate | aiProcess_FlipUVs);
-		// 递归处理结点
-		return this->processNode(sceneObjPtr->mRootNode, sceneObjPtr);
-	}
-	bool processNode(const aiNode* node, const aiScene* sceneObjPtr){
-		for (size_t i = 0; i < node->mNumMeshes; ++i) // 先处理自身结点
-		{
-			// 注意node中的mesh是对sceneObject中mesh的索引
-			const aiMesh* meshPtr = sceneObjPtr->mMeshes[node->mMeshes[i]];
-			this->processMesh(meshPtr, sceneObjPtr); // 处理Mesh
-		}
-
-		for (size_t i = 0; i < node->mNumChildren; ++i) // 再处理孩子结点
-		{
-			this->processNode(node->mChildren[i], sceneObjPtr);
-		}
-		return true;
-	}
-	bool processMesh(const aiMesh* meshPtr, const aiScene* sceneObjPtr){
-		vector<vec3> point_vector;
-		vector<uv> uv_vector;
-		vector<vec3> normal_vector;
-		// 从Mesh得到顶点数据、法向量、纹理数据
-		for (size_t i = 0; i < meshPtr->mNumVertices; ++i)
-		{
-			if (meshPtr->HasPositions())
-			{
-				vec3 temp_point(meshPtr->mVertices[i].x, meshPtr->mVertices[i].y, meshPtr->mVertices[i].z);
-				point_vector.push_back(temp_point);
-			}
-			// 获取纹理数据 目前只处理0号纹理
-			if (meshPtr->HasTextureCoords(0))
-			{
-				uv temp_uv(meshPtr->mTextureCoords[0][i].x, meshPtr->mTextureCoords[0][i].y);
-				uv_vector.push_back(temp_uv);
-			}
-			else
-			{
-				uv temp_uv(0.0f, 0.0f);
-				uv_vector.push_back(temp_uv);
-			}
-			// 获取法向量数据
-			if (meshPtr->HasNormals())
-			{
-				vec3 temp_normal(meshPtr->mNormals[i].x, meshPtr->mNormals[i].y, meshPtr->mNormals[i].z);
-				normal_vector.push_back(temp_normal);
-			}
-		}
-		// 获取索引数据
-		for (size_t i = 0; i < meshPtr->mNumFaces; ++i)
-		{
-			aiFace face = meshPtr->mFaces[i];
-			if (face.mNumIndices != 3)
-			{
-				std::cerr << "Error:Model::processMesh, mesh not transformed to triangle mesh." << std::endl;
-				return false;
-			}
-			int index0 = face.mIndices[0];
-			int index1 = face.mIndices[1];
-			int index2 = face.mIndices[2];
-			vec3 p0 = point_vector.at(index0);
-			vec3 n0 = normal_vector.at(index0);
-			float u0 = uv_vector.at(index0).u;
-			float v0 = uv_vector.at(index0).v;
-
-			vec3 p1 = point_vector.at(index1);
-			vec3 n1 = normal_vector.at(index1);
-			float u1 = uv_vector.at(index1).u;
-			float v1 = uv_vector.at(index1).v;
-
-			vec3 p2 = point_vector.at(index2);
-			vec3 n2 = normal_vector.at(index2);
-			float u2 = uv_vector.at(index2).u;
-			float v2 = uv_vector.at(index2).v;
-			/*
-			triangle(vec3 p0, vec3 p1, vec3 p2, vec3 n0, vec3 n1, vec3 n2, material* mat,
-			float u0 = 0, float v0 = 0, float u1 = 1, float v1 = 0.5,
-			float u2 = 0, float v2 = 1)
-			*/
-			triangle temp_tri(size_to*p0 + center, size_to*p1 + center, size_to*p2 + center,
-				n0, n1, n2, mat_ptr, u0, v0, u1, v1, u2, v2);
-			mod.push_back(temp_tri);
-		}
-		return true;
-	}
-
+	void loadModel(const std::string& filePath, vec3 &cen, float &size);
 	model(){}
-	model(vec3 cen,const std::string &path, material* mat,float Size_to = 0.0f){
+	model(vec3 cen,const std::string &path, material* mat,float Size=1.0f ){
+		cout << Size;
 		mat_ptr = mat;
-		center = cen;
-		size_to = Size_to;
-		loadModel(path);
+		minxyz = vec3(1000000, 1000000, 1000000);
+		maxxyz = vec3(-1000000, -1000000, -1000000);
+		loadModel(path,cen,Size);
 	}
 	virtual bool hit(const ray& r, float t_min, float t_max, hit_record& rec) const{
 		hit_record temp_rec;
@@ -122,9 +37,100 @@ public:
 		}
 		return hit_anything;
 	}
-	vec3 center;
-	float size_to;
+	virtual bool bounding_box(double t0, double t1, aabb& output_box) const{
+		output_box = aabb(minxyz,maxxyz);
+		return true;
+	}
 	vector<triangle> mod;
 	material *mat_ptr;
+	vec3 minxyz;
+	vec3 maxxyz;
 };
+void model::loadModel(const string &filePath, vec3 &cen,float &size){
+	ifstream in(filePath);
+	if (in.fail())
+	{
+		std::cout << "Fail to load obj->" << filePath << endl;
+	}
+	string line;
+	vector<vec3> points;
+	vector<vec3> normals;
+	vector<uv> uvs;
+	while (!in.eof())
+	{
+		getline(in, line);
+		char trash;
+		float x, y, z, u, v;
+		istringstream iss(line.c_str());
+		if (!line.compare(0, 2, "v "))
+		{
+			iss >> trash;
+			iss >> x >> y >> z;
+			vec3 vertex(x, y, z);
+			points.push_back(vertex);
+			if (minxyz.x() > x)minxyz[0] = x;
+			if (minxyz.y() > y)minxyz[1] = y;
+			if (minxyz.z() > z)minxyz[2] = z;
+			if (maxxyz.x() < x)maxxyz[0] = x;
+			if (maxxyz.y() < y)maxxyz[1] = y;
+			if (maxxyz.z() < z)maxxyz[2] = z;
+		}
+		else if (!line.compare(0, 3, "vn "))
+		{
+			iss >> trash >> trash;
+			iss >> x >> y >> z;
+			vec3 normal(x, y, z);
+			normals.push_back(normal);
+		}
+		else if (!line.compare(0, 3, "vt "))
+		{
+			iss >> trash >> trash;
+			iss >> u;
+			iss >> v;
+			uv texcoord(u, v);
+			uvs.push_back(texcoord);
+		}
+		else if (!line.compare(0, 2, "f "))
+		{
+			iss >> trash;
+			int num = count(line.begin(), line.end(), '/');
+			int index_point0;
+			int index_point1;
+			int index_point2;
+			int index_point3;
+			
+			int index_normal0;
+			int index_normal1;
+			int index_normal2;
+			int index_normal3;
+			
+			int index_uv0, index_uv1, index_uv2, index_uv3;
+			if (num == 6){
+				iss >> index_point0 >> trash >> index_uv0 >> trash >> index_normal0 >>
+					index_point1 >> trash >> index_uv1 >> trash >> index_normal1 >>
+					index_point2 >> trash >> index_uv2 >> trash >> index_normal2;
+				mod.push_back(triangle(points[index_point0 - 1] * size + cen, points[index_point1 - 1] * size + cen,
+					points[index_point2 - 1] * size + cen,
+					normals[index_normal0 - 1], normals[index_normal1 - 1], normals[index_normal2 - 1],
+					mat_ptr, uvs[index_uv0 - 1].u, uvs[index_uv0 - 1].v, uvs[index_uv1 - 1].u,
+					uvs[index_uv1 - 1].v, uvs[index_uv2 - 1].u, uvs[index_uv2 - 1].v));
+			}
+			else if(num==8){
+				iss >> index_point0 >> trash >> index_uv0 >> trash >> index_normal0 >>
+					index_point1 >> trash >> index_uv1 >> trash >> index_normal1 >>
+					index_point2 >> trash >> index_uv2 >> trash >> index_normal2 >>
+					index_point3 >> trash >> index_uv3 >> trash >> index_normal3;
+				mod.push_back(triangle(points[index_point0 - 1] * size + cen, points[index_point1 - 1] * size + cen, points[index_point2 - 1] * size + cen,
+					normals[index_normal0 - 1], normals[index_normal1 - 1], normals[index_normal2 - 1],
+					mat_ptr, uvs[index_uv0 - 1].u, uvs[index_uv0 - 1].v, uvs[index_uv1 - 1].u,
+					uvs[index_uv1 - 1].v, uvs[index_uv2 - 1].u, uvs[index_uv2 - 1].v));
+				mod.push_back(triangle(points[index_point3 - 1] * size + cen, points[index_point1 - 1] * size + cen, points[index_point2 - 1] * size + cen,
+					normals[index_normal3 - 1], normals[index_normal1 - 1], normals[index_normal2 - 1],
+					mat_ptr, uvs[index_uv3 - 1].u, uvs[index_uv3 - 1].v, uvs[index_uv1 - 1].u,
+					uvs[index_uv1 - 1].v, uvs[index_uv2 - 1].u, uvs[index_uv2 - 1].v));
+			}
+		}
+	}
+	in.close();
+}
 #endif

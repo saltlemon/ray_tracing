@@ -47,30 +47,39 @@ vec3 what_color(const ray& r, hitable *world, int depth){
 		}
 	}
 	else{
+<<<<<<< Updated upstream
 		vec3 unit_dir = unit_vector(r.direction());
 		float temp = 0.5*(unit_dir.y() + 1.0);
 		return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
 		//return vec3(0.1, 0.1, 0.1);
+=======
+		//vec3 unit_dir = unit_vector(r.direction());
+		//float temp = 0.5*(unit_dir.y() + 1.0);
+		//return(1.0 - temp)*vec3(1.0, 1.0, 1.0) + temp*vec3(0.5, 0.7, 1.0);
+		return vec3(0.0, 0.0, 0.0);
+>>>>>>> Stashed changes
 	}
 }
 
 hitable *random_scene(){
 	int n = 500;
 	hitable **list = new hitable*[n + 1];
-	list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(
+	list[0] = new sphere(vec3(0, -1000, 0), 999, new lambertian(
 		make_shared<checker_texture>(
 		make_shared<solid_color>(0.2, 0.3, 0.1),
 		make_shared<solid_color>(0.9, 0.9, 0.9)
 		)));
 	int i = 1;
+	
+	list[i++] = new model(vec3(0.0, 0, 0), "diablo3_pose.obj", new lambertian(std::make_shared<img_texture>("diablo3_pose_diffuse.tga")),1);
 	for (int a = -6; a < 6; a++){
 		for (int b = -6; b < 6; b++){
 			float choose_mat = rand_num();
-			vec3 center(a + 0.9*rand_num(), 0.2, b + 0.9*rand_num());
-			if ((center - vec3(-4, 0.2, 0)).length()>0.9){
+			vec3 center(a + 0.9*rand_num(), -0.8, b + 0.9*rand_num());
+			if ((center - vec3(0, -0.8, 0)).length()>0.9 ){
 				if (choose_mat < 0.8){
-					list[i++] = new sphere(center, 0.2, new lambertian(
-						std::make_shared<solid_color>(rand_num()*rand_num(), rand_num()*rand_num(), rand_num()*rand_num())));
+					list[i++] = new sphere(center, 0.2, new diffuse_light(
+						std::make_shared<solid_color>(sqrt(rand_num()), sqrt(rand_num()), sqrt(rand_num()))));
 				}
 				else if (choose_mat < 0.95){
 					list[i++] = new sphere(center, 0.2, new metal(
@@ -82,12 +91,22 @@ hitable *random_scene(){
 			}
 		}
 	}
+<<<<<<< Updated upstream
 	
 	list[i++] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
 	list[i++] = new sphere(vec3(-4, 1, 0), 1.0, new diffuse_light(std::make_shared<solid_color>(4, 4, 4)));
 	list[i++] = new sphere(vec3(4, 1, 0), 1.0, new metal(vec3(0.7, 0.6, 0.5), 0.0));
 
 	return new hitable_list(list, i);
+=======
+
+	//list[i++] = new sphere(vec3(0, 1, 0), 1.0, new lambertian(std::make_shared<img_texture>("earth.jpg")));
+	list[i++] = new sphere(vec3(0, 2.2, 0), 1.0, new diffuse_light(std::make_shared<solid_color>(8, 8, 8)));
+	list[i++] = new sphere(vec3(0, 6, 0), 2, new diffuse_light(std::make_shared<solid_color>(200, 200, 200)));
+	list[i++] = new sphere(vec3(0, 0, 8), 2, new diffuse_light(std::make_shared<solid_color>(200, 200, 200)));
+	//list[i++] = new sphere(vec3(4, 1, 0), 1.0, new diffuse_light(std::make_shared<solid_color>(4, 4, 4)));
+	return  hitable_list(list, i);
+>>>>>>> Stashed changes
 }
 
 PathTracer::PathTracer()
@@ -121,8 +140,8 @@ unsigned char * PathTracer::render(double & timeConsuming)
 
 	// record start time.
 	double startFrame = clock();
-	vec3 lookfrom(5,1,3);
-	vec3 lookat(0,0.6,0);
+	vec3 lookfrom(0,1,5);
+	vec3 lookat(0,0.0,0);
 	float dist_to_focus = 5;
 	float aperture = 0.0;
 	camera cam(lookfrom, lookat, vec3(0, 1, 0), 45, m_width / m_height,aperture,dist_to_focus);
@@ -138,19 +157,26 @@ unsigned char * PathTracer::render(double & timeConsuming)
 	list[1] = new model(vec3(1, 0.6, 1), "box.obj", new lambertian(std::make_shared<img_texture>("earth.jpg")));
 	hitable *world = new hitable_list(list, 2);
 	// render the image pixel by pixel.
+<<<<<<< Updated upstream
+=======
+	*/
+	int num_ = 100;
+    #pragma omp parallel for
+>>>>>>> Stashed changes
 	for (int row = m_height - 1; row >= 0; --row)
 	{
+		
 		for (int col = 0; col < m_width; ++col)
 		{
 			// TODO: implement your ray tracing algorithm by yourself.
 			vec3 color(0,0,0);
-			for (int i = 0; i < 100; i++){
+			for (int i = 0; i < num_; i++){
 				float u = (static_cast<float>(col)+rand_num()) / static_cast<float>(m_width);
 				float v = (static_cast<float>(row)+rand_num()) / static_cast<float>(m_height);
 				ray r = cam.get_ray(u, v);
 				color += what_color(r, world ,0);
 			}
-			color /= 100;
+			color /= num_;
 			color = vec3(sqrt(color[0]), sqrt(color[1]), sqrt(color[2]));
 			drawPixel(col, row, color);
 		}

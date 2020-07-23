@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
 	// initialization.
 	PathTracer tracer;
-	tracer.initialize(400, 200);
+	tracer.initialize(600, 300);
 	
 	// rendering.
 	double timeConsuming = 0.0f;
