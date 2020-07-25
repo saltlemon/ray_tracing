@@ -124,10 +124,10 @@ void model::loadModel(const string &filePath, vec3 &cen, float &size){
 					normals[index_normal0 - 1], normals[index_normal1 - 1], normals[index_normal2 - 1],
 					mat_ptr, uvs[index_uv0 - 1].u, uvs[index_uv0 - 1].v, uvs[index_uv1 - 1].u,
 					uvs[index_uv1 - 1].v, uvs[index_uv2 - 1].u, uvs[index_uv2 - 1].v));
-				mod.push_back(triangle(points[index_point3 - 1] * size + cen, points[index_point1 - 1] * size + cen, points[index_point2 - 1] * size + cen,
-					normals[index_normal3 - 1], normals[index_normal1 - 1], normals[index_normal2 - 1],
-					mat_ptr, uvs[index_uv3 - 1].u, uvs[index_uv3 - 1].v, uvs[index_uv1 - 1].u,
-					uvs[index_uv1 - 1].v, uvs[index_uv2 - 1].u, uvs[index_uv2 - 1].v));
+				mod.push_back(triangle(points[index_point0 - 1] * size + cen, points[index_point3 - 1] * size + cen, points[index_point2 - 1] * size + cen,
+					normals[index_normal0 - 1], normals[index_normal3 - 1], normals[index_normal2 - 1],
+					mat_ptr, uvs[index_uv0 - 1].u, uvs[index_uv0 - 1].v, uvs[index_uv3 - 1].u,
+					uvs[index_uv3 - 1].v, uvs[index_uv2 - 1].u, uvs[index_uv2 - 1].v));
 			}
 		}
 	}

@@ -67,10 +67,10 @@ vec3 what_color(const ray& r, bvh_node *p, int depth){
 hitable_list random_scene(){
 	int n = 500;
 	hitable **list = new hitable*[n + 1];
-	list[0] = new model(vec3(0.0, 1, 0), "box.obj", new lambertian(std::make_shared<img_texture>("diablo3_pose_diffuse.tga")), 1);
+	list[0] = new model(vec3(0.0, 0, 0), "Rock_1.OBJ", new lambertian(std::make_shared<img_texture>("Rock_1_Base_Color.jpg")), 0.08);
 	
 	int i = 1;
-	list[i++] = new sphere(vec3(0, 3, 0), 1.0, new dielectric(1.5));
+	//list[i++] = new sphere(vec3(0, 3, 0), 1.0, new dielectric(1.5));
 	/*list[i++] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(
 		make_shared<checker_texture>(
 		make_shared<solid_color>(0.2, 0.3, 0.1),
@@ -142,7 +142,7 @@ unsigned char * PathTracer::render(double & timeConsuming)
 	vec3 lookat(0,1,0);
 	float dist_to_focus = 5;
 	float aperture = 0.0;
-	camera cam(lookfrom, lookat, vec3(0, 1, 0), 45, m_width / m_height,aperture,dist_to_focus);
+	camera cam(lookfrom, lookat, vec3(0, 1, 0), 60, m_width / m_height,aperture,dist_to_focus);
 	
 	hitable_list world = random_scene();
 	bvh_node *p = new bvh_node(world, 0.001, FLT_MAX);
