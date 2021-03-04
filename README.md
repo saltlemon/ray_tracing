@@ -150,3 +150,5 @@ auto comparator = (index == 0) ? box_x_compare
 通过在for循环前添加上述语句，然后在项目属性的语言，C++中，openMP支持改为是~，就可以自动将下面的for循环分成N份，(N为电脑CPU核数)，然后把每份指派给一个核去执行，而且多核之间为并行执行
 
 
+###结果
+![image](https://github.com/saltlemon/ray_tracing/blob/master/%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA.png)
